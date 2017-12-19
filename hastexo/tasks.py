@@ -222,7 +222,7 @@ class LaunchStackTask(Task):
             # Wait until delete finishes.
             retry = 0
             while ('FAILED' not in status and
-                   status != 'DELETE_COMPLETE'):
+                   status != 'NOT_FOUND'):
                 if retry:
                     logger.debug("Stack [%s] not ready, with status [%s]. "
                                  "Waiting %s seconds "
@@ -237,7 +237,7 @@ class LaunchStackTask(Task):
                                                                  status))
                     stack = heat.stacks.get(stack_id=stack.id)
                 except HTTPNotFound:
-                    status = 'DELETE_COMPLETE'
+                    status = 'NOT_FOUND'
                 else:
                     status = stack.stack_status
                     logger.debug("Got [%s] status "
@@ -251,7 +251,7 @@ class LaunchStackTask(Task):
                                                            retry))
                         status = 'DELETE_FAILED'
 
-            if status == 'DELETE_COMPLETE':
+            if status == 'NOT_FOUND':
                 logger.info("Stack [%s] deleted successfully.  "
                             "Recreating it." % stack_name)
                 res = heat.stacks.create(stack_name=stack_name,
